@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from typing import Protocol
 
 import pytest
@@ -18,19 +17,19 @@ class IScopedService(Protocol):
     ...
 
 
-@dataclass
-class ScopedService(IScopedService):
-    singleton: ISingletonService
+class ScopedService:
+    def __init__(self, singleton: ISingletonService) -> None:
+        self.singleton = singleton
 
 
 class ITransientService(Protocol):
     ...
 
 
-@dataclass
-class TransientService(ITransientService):
-    singleton: ISingletonService
-    scoped: IScopedService
+class TransientService:
+    def __init__(self, singleton: ISingletonService, scoped: IScopedService) -> None:
+        self.singleton = singleton
+        self.scoped = scoped
 
 
 @pytest.fixture
