@@ -1,9 +1,9 @@
 from typing import Any, Mapping, Optional, Set, Type, Union
 
-from meta_di.code_formatter import DEFAULT_CODE_FORMATTER, CodeFormatterProto
+from meta_di.code_formatter import CodeFormatterProto
 from meta_di.container_proto import ContainerProto
 from meta_di.exceptions import MissingServiceError
-from meta_di.inspector import InspectorProto, TypeHintInspector
+from meta_di.inspector import InspectorProto
 from meta_di.service_descriptor import ServiceDescriptor
 from meta_di.typing import ServiceId_T
 
@@ -16,19 +16,18 @@ class CodeGenerator:
     _singleton_instances_attr = "self._singleton_instances"
     _scoped_instances_attr = "self._scoped_instances"
     _service_getter_map_attr = "self._service_getter_map"
-    _default_container_svc_ids = set([ContainerProto, "di_container"])
 
     def __init__(
         self,
-        code_formatter: CodeFormatterProto = DEFAULT_CODE_FORMATTER,
-        inspector: InspectorProto[Any] = TypeHintInspector(),
-        preload_singleton_instances: bool = True,
-        container_svc_ids: Optional[Set[Any]] = None,
+        code_formatter: Optional[CodeFormatterProto],
+        inspector: InspectorProto[Any],
+        preload_singleton_instances: bool,
+        container_svc_ids: Optional[Set[Any]],
     ) -> None:
         self._code_formatter = code_formatter
         self._inspector = inspector
         self._preload_singleton_instances = preload_singleton_instances
-        self._container_svc_ids = container_svc_ids or self._default_container_svc_ids
+        self._container_svc_ids = container_svc_ids or {ContainerProto, "di_container"}
 
     def _get_getter_method_name(self, svc_desc: ServiceDescriptor[Any]) -> str:
         """

@@ -1,5 +1,6 @@
-from typing import Dict, Generic, Optional, Type
+from typing import Any, Dict, Generic, Optional, Set, Type
 
+from meta_di.code_formatter import DEFAULT_CODE_FORMATTER, CodeFormatterProto
 from meta_di.code_generator import CodeGenerator
 from meta_di.container_proto import ContainerProto
 from meta_di.exceptions import CannotInferProvider
@@ -16,13 +17,28 @@ class ContainerBuilder(Generic[ServiceId_T]):
     def __init__(
         self,
         inspector: InspectorProto[ServiceId_T] = TypeHintInspector(),
-        code_generator: Optional[CodeGenerator] = None,
+        code_formatter: Optional[CodeFormatterProto] = DEFAULT_CODE_FORMATTER,
+        preload_singleton_instances: bool = True,
+        container_svc_ids: Optional[Set[Any]] = None,
     ) -> None:
+        """
+        inspector: InspectorProto to use to inspect the dependencies of services. Defaults to TypeHintInspector
+        code_formatter: CodeFormatterProto to use to format the generated code. Defaults to black if installed
+        preload_singleton_instances: If true, singleton instances will be created when the container is instantiated. Defaults to True
+        container_svc_ids: Set of service identifiers that identify the container. Defaults to {ContainerProto, "di_container"}
+        """
         self._service_descriptors_map: Dict[
             ServiceId_T, ServiceDescriptor[ServiceId_T]
         ] = {}
+
         self._inspector = inspector
-        self._code_generator = code_generator or CodeGenerator()
+
+        self._code_generator = CodeGenerator(
+            inspector=inspector,
+            code_formatter=code_formatter,
+            preload_singleton_instances=preload_singleton_instances,
+            container_svc_ids=container_svc_ids,
+        )
 
     def _add_service(
         self,
