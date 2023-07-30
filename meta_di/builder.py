@@ -2,8 +2,8 @@ from typing import Dict, Generic, Optional, Type
 
 from meta_di.code_generator import CodeGenerator
 from meta_di.container_proto import ContainerProto
-from meta_di.dependency_resolver import ServiceResolverProto, TypeHintServiceResolver
 from meta_di.exceptions import CannotInferProvider
+from meta_di.inspector import InspectorProto, TypeHintInspector
 from meta_di.service_descriptor import ServiceDescriptor, ServiceLifecycle
 from meta_di.typing import Provider_T, ServiceId_T
 
@@ -15,15 +15,13 @@ class ContainerBuilder(Generic[ServiceId_T]):
 
     def __init__(
         self,
-        dependency_resolver: ServiceResolverProto[
-            ServiceId_T
-        ] = TypeHintServiceResolver(),
+        inspector: InspectorProto[ServiceId_T] = TypeHintInspector(),
         code_generator: Optional[CodeGenerator] = None,
     ) -> None:
         self._service_descriptors_map: Dict[
             ServiceId_T, ServiceDescriptor[ServiceId_T]
         ] = {}
-        self._dependency_resolver = dependency_resolver
+        self._inspector = inspector
         self._code_generator = code_generator or CodeGenerator()
 
     def _add_service(
@@ -38,7 +36,7 @@ class ContainerBuilder(Generic[ServiceId_T]):
 
             provider = service_id
 
-        dependency_kwargs = self._dependency_resolver.get_dependencies(provider)
+        dependency_kwargs = self._inspector.get_dependencies(provider)
         self._service_descriptors_map[service_id] = ServiceDescriptor(
             service_id=service_id,
             provider=provider,

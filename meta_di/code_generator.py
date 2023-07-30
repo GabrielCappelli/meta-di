@@ -3,7 +3,7 @@ from typing import Any, Mapping, Optional, Set, Type, Union
 from meta_di.code_formatter import DEFAULT_CODE_FORMATTER, CodeFormatterProto
 from meta_di.container_proto import ContainerProto
 from meta_di.exceptions import MissingServiceError
-from meta_di.inspector import DEFAULT_INSPECTOR, InspectorProto
+from meta_di.inspector import InspectorProto, TypeHintInspector
 from meta_di.service_descriptor import ServiceDescriptor
 from meta_di.typing import ServiceId_T
 
@@ -21,7 +21,7 @@ class CodeGenerator:
     def __init__(
         self,
         code_formatter: CodeFormatterProto = DEFAULT_CODE_FORMATTER,
-        inspector: InspectorProto = DEFAULT_INSPECTOR,
+        inspector: InspectorProto[Any] = TypeHintInspector(),
         preload_singleton_instances: bool = True,
         container_svc_ids: Optional[Set[Any]] = None,
     ) -> None:

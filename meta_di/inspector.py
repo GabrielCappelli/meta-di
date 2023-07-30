@@ -1,10 +1,11 @@
 import inspect
-from typing import Any, Protocol
+from typing import Any, Dict, Protocol
 
 from meta_di.exceptions import CannotReferenceError
+from meta_di.typing import Provider_T, ServiceId_T
 
 
-class InspectorProto(Protocol):
+class InspectorProto(Protocol[ServiceId_T]):
     """
     Inspects objects to get required information for code generation
     """
@@ -41,8 +42,16 @@ class InspectorProto(Protocol):
         """
         ...
 
+    def get_dependencies(self, provider: Provider_T) -> Dict[str, ServiceId_T]:
+        """
+        Extracts dependencies from a provider and returns them as a dict
+        where the keys are the name of the func arguments
+        and the values are the ServiceId_T of the dependencies
+        """
+        ...
 
-class Inspector(InspectorProto):
+
+class BaseInspector(InspectorProto[ServiceId_T]):
     def requires_import(self, obj: Any) -> bool:
         if isinstance(obj, type):
             return True
@@ -64,5 +73,35 @@ class Inspector(InspectorProto):
     def get_full_name(self, obj: Any) -> str:
         return f"{self.get_module_name(obj)}.{obj.__qualname__}"
 
+    def get_dependencies(self, provider: Provider_T) -> Dict[str, ServiceId_T]:
+        raise NotImplementedError()
 
-DEFAULT_INSPECTOR = Inspector()
+
+class TypeHintInspector(BaseInspector[type]):
+    """
+    DependencyResolver that uses the types extracted from type hints as ServiceId_T
+    """
+
+    def get_dependencies(self, provider: Provider_T) -> Dict[str, type]:
+        return {
+            arg_name: arg_type
+            for arg_name, arg_type in inspect.getfullargspec(
+                provider
+            ).annotations.items()
+            if arg_name != "self" and arg_type
+        }
+
+
+class ArgNameInspector(BaseInspector[str]):
+    """
+    DependencyResolver that uses the names of args as ServiceId_T
+    """
+
+    def get_dependencies(self, provider: Provider_T) -> Dict[str, str]:
+        return {
+            arg_name: arg_name
+            for arg_name, arg in inspect.signature(provider).parameters.items()
+            if arg_name != "self"
+            and arg.kind
+            not in (inspect.Parameter.VAR_KEYWORD, inspect.Parameter.VAR_POSITIONAL)
+        }
