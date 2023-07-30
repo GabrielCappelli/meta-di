@@ -1,0 +1,52 @@
+[tool.isort]
+profile = "black"
+
+[tool.pylint]
+ignore=[]
+disable=[
+    "missing-class-docstring",
+    "missing-module-docstring",
+    "missing-function-docstring",
+    "invalid-name",
+    "eval-used",
+    "unnecessary-ellipsis",
+    "fixme",
+    "line-too-long", # Let black handle this
+    "c-extension-no-member", # Let pyright handle this
+    "no-member", # Let pyright handle this
+]
+
+[tool.pyright]
+exclude=[]
+
+[tool.pytest.ini_options]
+addopts = ["-p", "no:cacheprovider"]
+
+[tool.hatch]
+[tool.hatch.build.targets.sdist]
+include = [
+  "README.md",
+  "LICENSE",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["meta_di"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "meta-di"
+version = "0.0.1"
+description = "DI container using meta programming"
+license = "MIT"
+readme = "README.md"
+requires-python = ">=3.8"
+authors = [{name="Gabriel Cappelli", email="6148081+GabrielCappelli@users.noreply.github.com"}]
+
+[project.urls]
+Homepage = 'https://github.com/GabrielCappelli/meta-di'
+Documentation = 'https://github.com/GabrielCappelli/meta-di'
+Source = 'https://github.com/GabrielCappelli/meta-di'
+
